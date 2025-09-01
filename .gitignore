@@ -215,6 +215,9 @@ static/
 .env.test.local
 .env.production.local
 
+# API configuration with sensitive data
+Descompressao/fichas_api_config.py
+
 # Logs
 logs/
 *.log
