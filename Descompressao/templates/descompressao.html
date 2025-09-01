@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Cálculo de Descompressão Salarial</h1>
+    <p>Este formulário calcula o valor de descompressão salarial.</p>
+    <p>Preencha os campos abaixo com a matrícula do professor, a data de início e a data final.</p>
+    
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Gerar Excel</button>
+    </form>
+    {% if message %}
+        <p><strong>{{ message }}</strong></p>
+    {% endif %}
+    <br>
+{% endblock %}
