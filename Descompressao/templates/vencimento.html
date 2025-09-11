@@ -35,14 +35,6 @@
                                         {% endfor %}
                                     </div>
                                 {% endif %}
-                                
-                                <!-- Professor validation feedback -->
-                                <div id="professor-validation" class="mt-2" style="display: none;">
-                                    <div id="professor-info" class="alert alert-info">
-                                        <i class="fas fa-user"></i>
-                                        <span id="professor-name"></span>
-                                    </div>
-                                </div>
                             </div>
                             
                             <div class="row">
@@ -81,12 +73,6 @@
                                 </div>
                             </div>
                             
-                            <!-- Vencimento preview -->
-                            <div id="vencimento-preview" class="alert alert-warning" style="display: none;">
-                                <h6><i class="fas fa-eye"></i> Prévia dos Dados de Vencimento:</h6>
-                                <div id="preview-content"></div>
-                            </div>
-                            
                             <!-- Form errors -->
                             {% if form.non_field_errors %}
                                 <div class="alert alert-danger">
@@ -96,10 +82,7 @@
                                 </div>
                             {% endif %}
                             
-                            <div class="d-grid gap-2">
-                                <button type="button" id="previewBtn" class="btn btn-outline-primary">
-                                    <i class="fas fa-search"></i> Visualizar Dados
-                                </button>
+                            <div class="d-grid">
                                 <button type="submit" class="btn btn-success btn-lg">
                                     <i class="fas fa-calculator"></i> Calcular Vencimentos
                                 </button>
@@ -118,6 +101,39 @@
                         </h5>
                     </div>
                     <div class="card-body">
+                        <!-- JSON File Save Status -->
+                        {% if json_file_info %}
+                        <div class="alert {% if json_file_info.success %}alert-success{% else %}alert-warning{% endif %} mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    {% if json_file_info.success %}
+                                        <i class="fas fa-file-download me-2"></i>
+                                        <strong>Arquivo JSON Criado:</strong> {{ json_file_info.filename }}
+                                        <br><small class="text-muted">
+                                            📁 <strong>Local:</strong> {{ json_file_info.file_path }}
+                                            {% if json_file_info.record_count %}
+                                            <br>📊 <strong>Registros salvos:</strong> {{ json_file_info.record_count }} vencimentos
+                                            {% endif %}
+                                        </small>
+                                        <br><small class="text-info">
+                                            💡 <strong>Estrutura:</strong> Dados organizados com metadados, resumo mensal, dados completos do professor e registros individuais para análise externa.
+                                        </small>
+                                    {% else %}
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        <strong>Aviso:</strong> {{ json_file_info.message }}
+                                    {% endif %}
+                                </div>
+                                {% if json_file_info.success %}
+                                <div>
+                                    <span class="badge bg-success fs-6">
+                                        <i class="fas fa-check"></i> JSON Salvo
+                                    </span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <h6><strong>Professor:</strong> {{ resultados.professor_name }}</h6>
@@ -233,6 +249,89 @@
                 </div>
                 {% endif %}
                 
+                <!-- Professor Complete Data Section -->
+                {% if professor_data %}
+                <div class="card mt-4">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-user-graduate"></i>
+                            Dados Completos do Professor (API Response)
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Debug:</strong> Esta seção mostra TODOS os dados do professor retornados pela API, 
+                            incluindo informações pessoais e estrutura completa.
+                        </div>
+                        
+                        <!-- Show professor data in a formatted way -->
+                        <div class="accordion" id="professorDataAccordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="basicDataHeading">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" 
+                                            data-bs-target="#basicDataCollapse" aria-expanded="true">
+                                        <i class="fas fa-id-card me-2"></i>
+                                        Informações Básicas do Servidor
+                                    </button>
+                                </h2>
+                                <div id="basicDataCollapse" class="accordion-collapse collapse show">
+                                    <div class="accordion-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <ul class="list-group">
+                                                    <li class="list-group-item d-flex justify-content-between">
+                                                        <strong>Nome:</strong>
+                                                        <span>{{ professor_data.SERVIDOR_NOME|default:"N/A" }}</span>
+                                                    </li>
+                                                    <li class="list-group-item d-flex justify-content-between">
+                                                        <strong>CPF:</strong>
+                                                        <span>{{ professor_data.SERVIDOR_CPF|default:"N/A" }}</span>
+                                                    </li>
+                                                    <li class="list-group-item d-flex justify-content-between">
+                                                        <strong>Matrícula:</strong>
+                                                        <span>{{ professor_data.SERVIDOR_MATRICULA|default:"N/A" }}</span>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <ul class="list-group">
+                                                    <li class="list-group-item d-flex justify-content-between">
+                                                        <strong>ID Servidor:</strong>
+                                                        <span>{{ professor_data.SERVIDOR_ID|default:"N/A" }}</span>
+                                                    </li>
+                                                    <li class="list-group-item d-flex justify-content-between">
+                                                        <strong>Total Fichas:</strong>
+                                                        <span>{{ professor_data.fichasFinanceiras|length|default:"0" }}</span>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="rawDataHeading">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                            data-bs-target="#rawDataCollapse" aria-expanded="false">
+                                        <i class="fas fa-code me-2"></i>
+                                        Dados Brutos Completos (JSON)
+                                    </button>
+                                </h2>
+                                <div id="rawDataCollapse" class="accordion-collapse collapse">
+                                    <div class="accordion-body">
+                                        <div class="bg-dark text-light p-3 rounded">
+                                            <pre style="white-space: pre-wrap; font-size: 12px;">{{ professor_data }}</pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
                 <!-- Messages -->
                 {% if messages %}
                     <div class="mt-3">
@@ -254,113 +353,4 @@
             </div>
         </div>
     </div>
-
-    <!-- JavaScript for AJAX functionality -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const matriculaField = document.getElementById('{{ form.matricula.id_for_label }}');
-            const dataInicioField = document.getElementById('{{ form.data_inicio.id_for_label }}');
-            const dataFimField = document.getElementById('{{ form.data_fim.id_for_label }}');
-            const previewBtn = document.getElementById('previewBtn');
-            const professorValidation = document.getElementById('professor-validation');
-            const professorName = document.getElementById('professor-name');
-            const vencimentoPreview = document.getElementById('vencimento-preview');
-            const previewContent = document.getElementById('preview-content');
-            
-            // Validate professor when matricula changes
-            matriculaField.addEventListener('blur', function() {
-                const matricula = this.value.trim();
-                if (matricula) {
-                    validateProfessor(matricula);
-                }
-            });
-            
-            // Preview vencimento data
-            previewBtn.addEventListener('click', function() {
-                const matricula = matriculaField.value.trim();
-                const dataInicio = dataInicioField.value;
-                const dataFim = dataFimField.value;
-                
-                if (!matricula || !dataInicio || !dataFim) {
-                    alert('Por favor, preencha todos os campos antes de visualizar os dados.');
-                    return;
-                }
-                
-                previewVencimentoData(matricula, dataInicio, dataFim);
-            });
-            
-            function validateProfessor(matricula) {
-                fetch(`{% url 'validate_professor' %}?matricula=${matricula}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.valid) {
-                            professorName.textContent = data.professor.servidor.SERVIDOR_NOME;
-                            professorValidation.style.display = 'block';
-                            professorValidation.className = 'mt-2';
-                            document.getElementById('professor-info').className = 'alert alert-success';
-                        } else {
-                            professorValidation.style.display = 'block';
-                            document.getElementById('professor-info').className = 'alert alert-danger';
-                            professorName.textContent = data.message;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error validating professor:', error);
-                    });
-            }
-            
-            function previewVencimentoData(matricula, dataInicio, dataFim) {
-                previewBtn.disabled = true;
-                previewBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Carregando...';
-                
-                fetch(`{% url 'vencimento_preview' %}?matricula=${matricula}&data_inicio=${dataInicio}&data_fim=${dataFim}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            let html = `
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <strong>Professor:</strong> ${data.professor_name}<br>
-                                        <strong>Período:</strong> ${data.periodo_inicio} a ${data.periodo_fim}<br>
-                                        <strong>Total de Registros:</strong> ${data.total_registros}
-                                    </div>
-                                    <div class="col-md-6">
-                                        <strong>Valor Total:</strong> R$ ${data.total_valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}<br>
-                                        <strong>Valor Médio:</strong> R$ ${data.valor_medio.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
-                                    </div>
-                                </div>
-                            `;
-                            
-                            if (Object.keys(data.monthly_summary).length > 0) {
-                                html += '<hr><h6>Resumo Mensal:</h6><div class="row">';
-                                let count = 0;
-                                for (const [month, value] of Object.entries(data.monthly_summary)) {
-                                    if (count % 3 === 0 && count > 0) html += '</div><div class="row">';
-                                    html += `<div class="col-md-4"><small>${month}: R$ ${value.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</small></div>`;
-                                    count++;
-                                }
-                                html += '</div>';
-                            }
-                            
-                            previewContent.innerHTML = html;
-                            vencimentoPreview.style.display = 'block';
-                        } else {
-                            previewContent.innerHTML = `<div class="text-danger">${data.message}</div>`;
-                            vencimentoPreview.style.display = 'block';
-                            vencimentoPreview.className = 'alert alert-danger';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error getting vencimento preview:', error);
-                        previewContent.innerHTML = '<div class="text-danger">Erro ao buscar dados de vencimento.</div>';
-                        vencimentoPreview.style.display = 'block';
-                        vencimentoPreview.className = 'alert alert-danger';
-                    })
-                    .finally(() => {
-                        previewBtn.disabled = false;
-                        previewBtn.innerHTML = '<i class="fas fa-search"></i> Visualizar Dados';
-                    });
-            }
-        });
-    </script>
 {% endblock %}

@@ -7,12 +7,7 @@ import sys
 from datetime import datetime, date
 from typing import Optional, Dict, List, Any
 
-# Ensure we have the right path
-current_dir = os.path.dirname(os.path.abspath(__file__))
-utils_dir = os.path.join(current_dir, 'utils')
-if utils_dir not in sys.path:
-    sys.path.insert(0, utils_dir)
-
+# Since we're now in the utils directory, we can import fichas_api directly
 try:
     from fichas_api import FichasAPI_Manager
 except ImportError as e:
@@ -69,11 +64,14 @@ class VencimentoServiceFixed:
             
             # Step 4: Calculate summary
             total_vencimentos = sum(record['valor'] for record in vencimento_data)
+            valor_medio = total_vencimentos / len(vencimento_data) if len(vencimento_data) > 0 else 0
             
             return {
                 'success': True,
                 'message': f'Dados calculados com sucesso! {len(vencimento_data)} registros de vencimento processados.',
                 'data': processed_data,
+                'raw_data': vencimento_data,  # Add raw data for complete view
+                'professor_full_data': professor,  # Add complete professor data
                 'metadata': {
                     'professor_name': professor_name,
                     'matricula': matricula,
@@ -81,6 +79,7 @@ class VencimentoServiceFixed:
                     'periodo_fim': f"{data_fim.month:02d}/{data_fim.year}",
                     'total_registros': len(vencimento_data),
                     'total_vencimentos': total_vencimentos,
+                    'valor_medio': valor_medio,
                     'filename': f'vencimentos_{matricula.replace("-", "_")}_{data_inicio.strftime("%Y%m")}_{data_fim.strftime("%Y%m")}.xlsx'
                 }
             }
